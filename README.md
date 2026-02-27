@@ -1,4 +1,4 @@
-# qr-forever
+# QRCODE (qr-forever)
 
 Production-ready MVP monorepo for minting QR records on Polygon using **USDC only**.
 
