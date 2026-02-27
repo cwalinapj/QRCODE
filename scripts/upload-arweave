@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+if ! command -v npx >/dev/null 2>&1; then
+  echo "npx is required"
+  exit 1
+fi
+
+if [[ $# -lt 2 ]]; then
+  echo "Usage: scripts/upload-arweave <folder> <wallet-keyfile.json>"
+  exit 1
+fi
+
+FOLDER="$1"
+KEYFILE="$2"
+
+echo "Deploying $FOLDER to Arweave using permaweb-deploy..."
+npx permaweb-deploy "$FOLDER" --wallet "$KEYFILE"

@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+echo "upload-ipfs (MVP placeholder)"
+echo ""
+echo "Recommended pinning providers: Pinata, Web3.Storage, NFT.Storage, or your own IPFS node."
+echo ""
+echo "Example with web3.storage CLI (install separately):"
+echo "  w3 up ./path-to-folder"
+echo ""
+echo "Then use the returned CID in mint flow as targetType=ipfs."

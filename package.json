@@ -1,0 +1,22 @@
+{
+  "name": "qr-forever",
+  "private": true,
+  "version": "0.1.0",
+  "packageManager": "pnpm@9.15.0",
+  "scripts": {
+    "dev": "pnpm --parallel --filter @qr-forever/web --filter @qr-forever/resolver-worker dev",
+    "dev:web": "pnpm --filter @qr-forever/web dev",
+    "dev:worker": "pnpm --filter @qr-forever/resolver-worker dev",
+    "build": "pnpm -r --if-present build",
+    "lint": "pnpm -r --if-present lint",
+    "test": "pnpm -r --if-present test",
+    "test:e2e": "playwright test",
+    "typecheck": "pnpm -r --if-present typecheck",
+    "contracts:compile": "pnpm --filter @qr-forever/contracts compile",
+    "contracts:test": "pnpm --filter @qr-forever/contracts test",
+    "deploy:checklist": "node scripts/deploy-checklist.mjs"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.54.2"
+  }
+}

@@ -1,0 +1,17 @@
+node_modules
+.pnpm-store
+.next
+dist
+coverage
+.env
+.env.local
+.env.*.local
+.cache
+.DS_Store
+artifacts
+cache
+typechain-types
+apps/resolver-worker/.wrangler
+apps/resolver-worker/dist
+playwright-report
+test-results

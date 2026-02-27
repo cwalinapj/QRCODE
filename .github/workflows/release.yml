@@ -1,0 +1,35 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+jobs:
+  build-and-release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9.15.0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm --filter @qr-forever/contracts compile
+      - run: pnpm --filter @qr-forever/contracts export:abi
+      - run: pnpm --filter @qr-forever/web build
+      - run: pnpm --filter @qr-forever/resolver-worker build
+      - name: Prepare artifacts
+        run: |
+          mkdir -p release-artifacts
+          cp contracts/artifacts/contracts/QRRegistry.sol/QRRegistry.json release-artifacts/QRRegistry.artifact.json
+          cp packages/shared/abi/QRRegistry.json release-artifacts/QRRegistry.abi.json
+          if [ -d apps/web/.next ]; then tar -czf release-artifacts/web-build.tar.gz -C apps/web .next; fi
+          if [ -d apps/resolver-worker/.wrangler ]; then tar -czf release-artifacts/worker-bundle.tar.gz -C apps/resolver-worker .wrangler; fi
+      - name: Create release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: release-artifacts/*
