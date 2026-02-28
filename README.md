@@ -60,7 +60,13 @@ Deploy to Polygon mainnet:
 
 ```bash
 cd contracts
-pnpm deploy
+pnpm deploy:polygon
+```
+
+Or from repo root:
+
+```bash
+pnpm contracts:deploy
 ```
 
 Sync runtime config after deploy:
