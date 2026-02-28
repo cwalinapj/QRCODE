@@ -130,6 +130,16 @@ sudo FORCE_DEPLOY=1 /usr/local/bin/qr-forever-redeploy.sh
 
 Detailed guide: `docs/vps-deploy.md`
 
+## Ubuntu 24 VPS Dual-Domain (Web + Resolver)
+
+If you want both servers running on the VPS with separate domains:
+
+```bash
+sudo APP_DOMAIN=app.yourdomain.com RESOLVER_DOMAIN=q.yourdomain.com ENABLE_TLS=true LETSENCRYPT_EMAIL=you@yourdomain.com bash scripts/vps/bootstrap-ubuntu24-dual-domain.sh
+```
+
+Guide: `docs/vps-dual-domain.md`
+
 ## Mint QR (Polygon mainnet)
 
 1. Deploy `QRRegistry` to Polygon mainnet.
