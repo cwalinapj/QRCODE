@@ -102,6 +102,28 @@ Worker routes:
 - `GET /health`
 - `GET /r/<tokenId>`
 
+## Ubuntu 24 VPS Auto-Deploy
+
+For fresh VPS provisioning and auto-deploy from GitHub, use:
+
+```bash
+sudo DOMAIN=qr.yourdomain.com ENABLE_TLS=true LETSENCRYPT_EMAIL=you@yourdomain.com bash scripts/vps/bootstrap-ubuntu24.sh
+```
+
+The script installs system dependencies, clones the repo, builds the app, configures nginx, and installs:
+
+- `qr-forever-web.service` (web process)
+- `qr-forever-deploy.timer` (pull/build/restart loop)
+
+After bootstrap, edit runtime config:
+
+```bash
+sudo nano /etc/qr-forever/qr-forever.env
+sudo FORCE_DEPLOY=1 /usr/local/bin/qr-forever-redeploy.sh
+```
+
+Detailed guide: `docs/vps-deploy.md`
+
 ## Mint test QR (Amoy)
 
 1. Deploy `QRRegistry` to Amoy.
