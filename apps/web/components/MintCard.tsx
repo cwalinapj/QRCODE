@@ -246,6 +246,7 @@ export function MintCard() {
               const next = e.target.value as ModeUi;
               setMode(next);
               setTargetType(TARGET_OPTIONS[next][0]);
+              setTarget("");
             }}
           >
             <option value="immutable">Immutable Forever</option>
@@ -262,7 +263,10 @@ export function MintCard() {
           <select
             className="input"
             value={targetType}
-            onChange={(e) => setTargetType(e.target.value as TargetType)}
+            onChange={(e) => {
+              setTargetType(e.target.value as TargetType);
+              setTarget("");
+            }}
           >
             {TARGET_OPTIONS[mode].map((option) => (
               <option key={option} value={option}>
@@ -384,4 +388,3 @@ export function MintCard() {
     </div>
   );
 }
-
