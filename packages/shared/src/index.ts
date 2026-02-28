@@ -9,6 +9,7 @@ export const TARGET_TYPE = {
   URL: "url",
   IPFS: "ipfs",
   ARWEAVE: "arweave",
+  ADDRESS: "address",
 } as const;
 
 export const PRICES_USDC = {
@@ -22,11 +23,12 @@ export type TargetType = (typeof TARGET_TYPE)[keyof typeof TARGET_TYPE];
 export const ipfsRegex = /^(ipfs:\/\/)?(Qm[1-9A-HJ-NP-Za-km-z]{44}|bafy[1-9A-HJ-NP-Za-km-z]{20,})$/;
 export const arweaveRegex = /^(ar:\/\/)?[a-zA-Z0-9_-]{43,64}$/;
 export const httpsUrlRegex = /^https:\/\/.{1,2040}$/;
+export const evmAddressRegex = /^0x[a-fA-F0-9]{40}$/;
 
 export const RecordSchema = z.object({
   mode: z.number().int().min(0).max(1),
   target: z.string().min(1).max(2048),
-  targetType: z.enum([TARGET_TYPE.URL, TARGET_TYPE.IPFS, TARGET_TYPE.ARWEAVE]),
+  targetType: z.enum([TARGET_TYPE.URL, TARGET_TYPE.IPFS, TARGET_TYPE.ARWEAVE, TARGET_TYPE.ADDRESS]),
   createdAt: z.number(),
   updatedAt: z.number(),
   timelockSeconds: z.number(),
@@ -53,17 +55,23 @@ export function isValidHttpsUrl(input: string): boolean {
   return httpsUrlRegex.test(input.trim());
 }
 
+export function isValidAddressTarget(input: string): boolean {
+  return evmAddressRegex.test(input.trim());
+}
+
 export function isValidTargetByType(type: TargetType, target: string): boolean {
   const normalized = normalizeTarget(target);
   if (type === TARGET_TYPE.IPFS) return isValidIpfsTarget(normalized);
   if (type === TARGET_TYPE.ARWEAVE) return isValidArweaveTarget(normalized);
   if (type === TARGET_TYPE.URL) return isValidHttpsUrl(normalized);
+  if (type === TARGET_TYPE.ADDRESS) return isValidAddressTarget(normalized);
   return false;
 }
 
 export function toDestinationUrl(type: TargetType, target: string): string {
   const normalized = normalizeTarget(target);
   if (type === TARGET_TYPE.URL) return normalized;
+  if (type === TARGET_TYPE.ADDRESS) return `https://polygonscan.com/address/${normalized}`;
   if (type === TARGET_TYPE.IPFS) {
     return normalized.startsWith("ipfs://") ? normalized : `ipfs://${normalized.replace(/^ipfs:\/\//, "")}`;
   }
@@ -75,11 +83,9 @@ export function mintPrice(mode: number, targetType: TargetType): bigint {
     return PRICES_USDC.updateable;
   }
 
-  if (targetType === TARGET_TYPE.IPFS) {
-    return PRICES_USDC.immutableIpfs;
-  }
-
-  return PRICES_USDC.immutableArweave;
+  return targetType === TARGET_TYPE.ARWEAVE
+    ? PRICES_USDC.immutableArweave
+    : PRICES_USDC.immutableIpfs;
 }
 
 export function shortUsdc(amount: bigint): string {

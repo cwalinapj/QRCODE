@@ -6,7 +6,7 @@ Production-ready MVP monorepo for minting QR records on Polygon using **USDC onl
 
 - ERC-721 ownership model (`QRRegistry`) on Polygon
 - Two QR modes:
-  - **Immutable Forever** (`ipfs` or `arweave` target only)
+  - **Immutable Forever** (`url`, `address`, `ipfs`, or `arweave`)
   - **Owner-Updateable** (same token ID forever; target update by owner only)
 - Optional timelock for updateable records
 - On-chain auditable updates (events)

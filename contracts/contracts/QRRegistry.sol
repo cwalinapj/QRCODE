@@ -82,14 +82,11 @@ contract QRRegistry is ERC721, Ownable {
     }
 
     function mintImmutable(string calldata targetType, string calldata target) external returns (uint256 tokenId) {
-        bytes32 t = keccak256(bytes(targetType));
-        if (t != keccak256("ipfs") && t != keccak256("arweave")) {
-            revert InvalidTargetType();
-        }
-
+        _validateTargetType(targetType);
         _validateTarget(targetType, target);
 
-        uint256 price = t == keccak256("ipfs") ? immutableIpfsPriceUSDC : immutableArweavePriceUSDC;
+        bytes32 t = keccak256(bytes(targetType));
+        uint256 price = t == keccak256("arweave") ? immutableArweavePriceUSDC : immutableIpfsPriceUSDC;
         _collectUSDC(msg.sender, price);
 
         tokenId = nextTokenId++;
@@ -239,7 +236,8 @@ contract QRRegistry is ERC721, Ownable {
 
     function _validateTargetType(string calldata targetType) internal pure {
         bytes32 t = keccak256(bytes(targetType));
-        if (t != keccak256("url") && t != keccak256("ipfs") && t != keccak256("arweave")) {
+        if (t != keccak256("url") && t != keccak256("ipfs") && t != keccak256("arweave") && t != keccak256("address"))
+        {
             revert InvalidTargetType();
         }
     }
@@ -264,6 +262,11 @@ contract QRRegistry is ERC721, Ownable {
 
         if (t == keccak256("arweave")) {
             _validateArweave(target);
+            return;
+        }
+
+        if (t == keccak256("address")) {
+            _validateAddress(target);
             return;
         }
 
@@ -314,6 +317,23 @@ contract QRRegistry is ERC721, Ownable {
                 !(c >= 0x61 && c <= 0x7a) &&
                 c != 0x5f && // _
                 c != 0x2d // -
+            ) {
+                revert InvalidTarget();
+            }
+        }
+    }
+
+    function _validateAddress(string calldata target) internal pure {
+        bytes memory b = bytes(target);
+        if (b.length != 42) revert InvalidTarget();
+        if (b[0] != 0x30 || (b[1] != 0x78 && b[1] != 0x58)) revert InvalidTarget(); // 0x / 0X
+
+        for (uint256 i = 2; i < b.length; i++) {
+            bytes1 c = b[i];
+            if (
+                !(c >= 0x30 && c <= 0x39) && // 0-9
+                !(c >= 0x41 && c <= 0x46) && // A-F
+                !(c >= 0x61 && c <= 0x66) // a-f
             ) {
                 revert InvalidTarget();
             }

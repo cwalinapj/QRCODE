@@ -4,6 +4,8 @@
 
 You mint a QR that points to a fixed piece of content forever.
 
+- If you choose `url`, the QR points to a fixed HTTPS URL.
+- If you choose `address`, the QR stores a fixed EVM wallet address.
 - If you choose `ipfs`, the QR points to an IPFS CID.
 - If you choose `arweave`, the QR points to an Arweave transaction ID.
 - Nobody can edit this QR destination later.

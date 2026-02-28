@@ -4,6 +4,7 @@ import {
   MODE,
   TARGET_TYPE,
   isValidArweaveTarget,
+  isValidAddressTarget,
   isValidIpfsTarget,
   isValidTargetByType,
   mintPrice,
@@ -21,7 +22,16 @@ describe("shared validators", () => {
 
   it("derives prices", () => {
     expect(mintPrice(MODE.IMMUTABLE, TARGET_TYPE.IPFS)).toBe(19_000_000n);
+    expect(mintPrice(MODE.IMMUTABLE, TARGET_TYPE.URL)).toBe(19_000_000n);
+    expect(mintPrice(MODE.IMMUTABLE, TARGET_TYPE.ADDRESS)).toBe(19_000_000n);
+    expect(mintPrice(MODE.IMMUTABLE, TARGET_TYPE.ARWEAVE)).toBe(39_000_000n);
     expect(mintPrice(MODE.UPDATEABLE, TARGET_TYPE.URL)).toBe(59_000_000n);
     expect(isValidTargetByType(TARGET_TYPE.URL, "https://example.com")).toBe(true);
+  });
+
+  it("validates address targets", () => {
+    expect(isValidAddressTarget("0x1111111111111111111111111111111111111111")).toBe(true);
+    expect(isValidTargetByType(TARGET_TYPE.ADDRESS, "0x1111111111111111111111111111111111111111")).toBe(true);
+    expect(isValidAddressTarget("0x123")).toBe(false);
   });
 });

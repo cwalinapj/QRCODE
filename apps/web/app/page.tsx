@@ -9,7 +9,7 @@ const features = [
       </svg>
     ),
     title: "Immutable Forever",
-    description: "Pin your QR to IPFS or Arweave. The destination is locked on-chain and can never be changed.",
+    description: "Lock your QR destination forever (URL, wallet address, IPFS, or Arweave) with no future edits.",
   },
   {
     icon: (
@@ -115,4 +115,3 @@ export default function Home() {
     </div>
   );
 }
-

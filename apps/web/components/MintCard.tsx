@@ -19,8 +19,8 @@ import { appConfig, usdcAbi } from "@/lib/config";
 type ModeUi = "immutable" | "updateable";
 
 const TARGET_OPTIONS = {
-  immutable: [TARGET_TYPE.IPFS, TARGET_TYPE.ARWEAVE] as TargetType[],
-  updateable: [TARGET_TYPE.URL, TARGET_TYPE.IPFS, TARGET_TYPE.ARWEAVE] as TargetType[],
+  immutable: [TARGET_TYPE.URL, TARGET_TYPE.ADDRESS, TARGET_TYPE.IPFS, TARGET_TYPE.ARWEAVE] as TargetType[],
+  updateable: [TARGET_TYPE.URL, TARGET_TYPE.ADDRESS, TARGET_TYPE.IPFS, TARGET_TYPE.ARWEAVE] as TargetType[],
 };
 
 function WalletIcon() {
@@ -287,6 +287,8 @@ export function MintCard() {
           placeholder={
             targetType === TARGET_TYPE.URL
               ? "https://example.com"
+              : targetType === TARGET_TYPE.ADDRESS
+                ? "0x1111111111111111111111111111111111111111"
               : targetType === TARGET_TYPE.IPFS
                 ? "ipfs://bafy… or CID"
                 : "ar://TxID or TxID"

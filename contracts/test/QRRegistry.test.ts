@@ -31,11 +31,40 @@ describe("QRRegistry", function () {
     expect(await usdc.balanceOf(treasury.address)).to.equal(19_000_000);
   });
 
-  it("rejects immutable url target", async function () {
+  it("mints immutable url target", async function () {
+    const { user, treasury, usdc, registry } = await deploy();
+    await usdc.connect(user).approve(await registry.getAddress(), 19_000_000);
+
+    await expect(
+      registry.connect(user).mintImmutable("url", "https://example.com"),
+    )
+      .to.emit(registry, "Minted")
+      .withArgs(1, user.address, 0, "url", "https://example.com");
+
+    expect(await usdc.balanceOf(treasury.address)).to.equal(19_000_000);
+  });
+
+  it("mints immutable wallet address target", async function () {
+    const { user, treasury, usdc, registry } = await deploy();
+    const walletAddress = "0x1111111111111111111111111111111111111111";
+    await usdc.connect(user).approve(await registry.getAddress(), 19_000_000);
+
+    await expect(
+      registry.connect(user).mintImmutable("address", walletAddress),
+    )
+      .to.emit(registry, "Minted")
+      .withArgs(1, user.address, 0, "address", walletAddress);
+
+    expect(await usdc.balanceOf(treasury.address)).to.equal(19_000_000);
+  });
+
+  it("rejects invalid immutable address target", async function () {
     const { user, usdc, registry } = await deploy();
     await usdc.connect(user).approve(await registry.getAddress(), 19_000_000);
 
-    await expect(registry.connect(user).mintImmutable("url", "https://example.com")).to.be.reverted;
+    await expect(
+      registry.connect(user).mintImmutable("address", "0x1234"),
+    ).to.be.reverted;
   });
 
   it("supports direct update when timelock=0", async function () {
