@@ -1,4 +1,5 @@
 import { ethers } from "hardhat";
+import { isAddress } from "ethers";
 import fs from "node:fs";
 import path from "node:path";
 
@@ -8,10 +9,51 @@ async function main() {
   const treasuryAddress = process.env.TREASURY_ADDRESS;
 
   if (!usdcAddress || !treasuryAddress) {
-    throw new Error("USDC_ADDRESS and TREASURY_ADDRESS are required");
+    throw new Error(
+      "USDC_ADDRESS and TREASURY_ADDRESS are required. Set them in /Users/root1/QRCODE/.env.",
+    );
+  }
+
+  if (!isAddress(usdcAddress) || !isAddress(treasuryAddress)) {
+    throw new Error("USDC_ADDRESS and TREASURY_ADDRESS must be valid EVM addresses.");
   }
 
   const QRRegistry = await ethers.getContractFactory("QRRegistry");
+  const [deployer] = await ethers.getSigners();
+
+  if (!deployer) {
+    throw new Error(
+      "No deployer signer configured. Set PRIVATE_KEY in /Users/root1/QRCODE/.env.",
+    );
+  }
+
+  const deployTx = await QRRegistry.getDeployTransaction(usdcAddress, treasuryAddress);
+  const gasEstimate = await ethers.provider.estimateGas({
+    from: deployer.address,
+    data: deployTx.data,
+  });
+  const feeData = await ethers.provider.getFeeData();
+  const gasPrice = feeData.maxFeePerGas ?? feeData.gasPrice;
+
+  if (!gasPrice) {
+    throw new Error("Unable to determine gas price from network provider.");
+  }
+
+  const requiredBalance = gasEstimate * gasPrice;
+  const currentBalance = await ethers.provider.getBalance(deployer.address);
+
+  if (currentBalance < requiredBalance) {
+    const required = ethers.formatEther(requiredBalance);
+    const have = ethers.formatEther(currentBalance);
+    throw new Error(
+      `Insufficient POL for deployment gas on ${networkName}. Required ~${required} POL, wallet has ${have} POL. Fund ${deployer.address} and retry.`,
+    );
+  }
+
+  console.log(`Deployer: ${deployer.address}`);
+  console.log(`Estimated deploy gas: ${gasEstimate.toString()}`);
+  console.log(`Estimated gas cost: ${ethers.formatEther(requiredBalance)} POL`);
+
   const registry = await QRRegistry.deploy(usdcAddress, treasuryAddress);
   const receipt = await registry.deploymentTransaction()?.wait();
   await registry.waitForDeployment();

@@ -1,10 +1,20 @@
 import "@nomicfoundation/hardhat-toolbox";
 import * as dotenv from "dotenv";
+import fs from "node:fs";
+import path from "node:path";
 import { HardhatUserConfig } from "hardhat/config";
 
-dotenv.config({ path: "../.env" });
+const envCandidates = [
+  path.resolve(__dirname, "../.env"),
+  path.resolve(process.cwd(), ".env"),
+  path.resolve(process.cwd(), "../.env"),
+];
 
-dotenv.config();
+for (const envPath of envCandidates) {
+  if (fs.existsSync(envPath)) {
+    dotenv.config({ path: envPath });
+  }
+}
 
 const config: HardhatUserConfig = {
   solidity: {
