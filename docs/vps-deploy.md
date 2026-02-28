@@ -8,6 +8,8 @@ This repo includes a one-shot bootstrap script for fresh Ubuntu 24.04 servers:
 - creates a timer that checks for new commits and auto-redeploys
 - optionally deploys the Cloudflare worker on each redeploy
 
+Default chain configuration is Polygon mainnet (`chainId=137`, `https://polygon-rpc.com`).
+
 ## 1) DNS before running (recommended)
 
 Point your domain A record to the VPS IP.

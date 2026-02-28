@@ -10,6 +10,8 @@
     "typecheck": "hardhat compile",
     "test": "hardhat test",
     "coverage": "hardhat coverage",
+    "deploy": "hardhat run scripts/deploy.ts --network polygon",
+    "deploy:polygon": "hardhat run scripts/deploy.ts --network polygon",
     "deploy:amoy": "hardhat run scripts/deploy.ts --network amoy",
     "export:abi": "hardhat run scripts/export-abi.ts"
   },

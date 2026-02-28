@@ -56,18 +56,18 @@ pnpm contracts:compile
 pnpm contracts:test
 ```
 
-Deploy to Amoy:
+Deploy to Polygon mainnet:
 
 ```bash
 cd contracts
-pnpm deploy:amoy
+pnpm deploy
 ```
 
 Sync runtime config after deploy:
 
 ```bash
 cd ..
-pnpm deploy:checklist -- --address 0xYourDeployedContract --network amoy
+pnpm deploy:checklist -- --address 0xYourDeployedContract --network polygon
 ```
 
 This validates required env values and writes:
@@ -124,26 +124,16 @@ sudo FORCE_DEPLOY=1 /usr/local/bin/qr-forever-redeploy.sh
 
 Detailed guide: `docs/vps-deploy.md`
 
-## Mint test QR (Amoy)
+## Mint QR (Polygon mainnet)
 
-1. Deploy `QRRegistry` to Amoy.
+1. Deploy `QRRegistry` to Polygon mainnet.
 2. Set `NEXT_PUBLIC_CONTRACT_ADDRESS` and `RESOLVER_CONTRACT_ADDRESS`.
-3. Fund wallet with Amoy gas and test USDC.
+3. Fund wallet with POL gas and hold Polygon USDC.
 4. Open web app.
 5. Connect wallet.
 6. Choose mode + target.
 7. Approve USDC and mint.
 8. Open generated resolver URL.
-
-## Switch from testnet to mainnet
-
-- Set `POLYGON_RPC_URL` to Polygon mainnet RPC.
-- Keep `USDC_ADDRESS` as Polygon native USDC.
-- Deploy a fresh contract.
-- Update:
-  - `NEXT_PUBLIC_CONTRACT_ADDRESS`
-  - `RESOLVER_CONTRACT_ADDRESS`
-  - resolver worker secrets/vars
 
 ## Security model
 

@@ -1,12 +1,12 @@
 export const appConfig = {
-  chainId: Number(process.env.NEXT_PUBLIC_CHAIN_ID || 80002),
+  chainId: Number(process.env.NEXT_PUBLIC_CHAIN_ID || 137),
   contractAddress: process.env.NEXT_PUBLIC_CONTRACT_ADDRESS || "",
   usdcAddress:
     process.env.NEXT_PUBLIC_USDC_ADDRESS ||
     "0x3c499c542cef5e3811e1192ce70d8cc03d5c3359",
   rpcUrl:
     process.env.NEXT_PUBLIC_POLYGON_RPC_URL ||
-    "https://rpc-amoy.polygon.technology",
+    "https://polygon-rpc.com",
   resolverBaseUrl:
     process.env.NEXT_PUBLIC_RESOLVER_BASE_URL || "https://q.example.com",
   walletConnectProjectId:

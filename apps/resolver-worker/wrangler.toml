@@ -3,7 +3,7 @@ main = "src/index.ts"
 compatibility_date = "2025-02-01"
 
 [vars]
-POLYGON_RPC_URL = "https://rpc-amoy.polygon.technology"
+POLYGON_RPC_URL = "https://polygon-rpc.com"
 CONTRACT_ADDRESS = ""
 RATE_LIMIT_PER_MINUTE = "60"
 MOCK_RECORDS_JSON = ""

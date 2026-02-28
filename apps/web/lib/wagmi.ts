@@ -9,7 +9,7 @@ import { appConfig } from "./config";
 
 const chain = defineChain({
   id: appConfig.chainId,
-  name: appConfig.chainId === 137 ? "Polygon" : "Polygon Amoy",
+  name: appConfig.chainId === 137 ? "Polygon Mainnet" : "Polygon Amoy",
   nativeCurrency: {
     name: "POL",
     symbol: "POL",

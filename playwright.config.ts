@@ -18,7 +18,7 @@ export default defineConfig({
     },
     {
       command:
-        "pnpm --filter @qr-forever/resolver-worker exec wrangler dev --port 8787 --var CONTRACT_ADDRESS:0x0000000000000000000000000000000000000001 --var POLYGON_RPC_URL:https://rpc-amoy.polygon.technology --var RATE_LIMIT_PER_MINUTE:60 --var MOCK_RECORDS_JSON:'{\"1\":{\"targetType\":\"url\",\"target\":\"https://example.com\",\"txHash\":\"0xabc123\"}}'",
+        "pnpm --filter @qr-forever/resolver-worker exec wrangler dev --port 8787 --var CONTRACT_ADDRESS:0x0000000000000000000000000000000000000001 --var POLYGON_RPC_URL:https://polygon-rpc.com --var RATE_LIMIT_PER_MINUTE:60 --var MOCK_RECORDS_JSON:'{\"1\":{\"targetType\":\"url\",\"target\":\"https://example.com\",\"txHash\":\"0xabc123\"}}'",
       url: "http://127.0.0.1:8787/health",
       timeout: 120_000,
       reuseExistingServer: !process.env.CI,

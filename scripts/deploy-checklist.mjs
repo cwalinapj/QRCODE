@@ -14,9 +14,13 @@ const getArg = (flag) => {
 };
 
 const deployedAddress = getArg("--address");
-const network = (getArg("--network") || "amoy").toLowerCase();
+const network = (getArg("--network") || "polygon").toLowerCase();
 
-const chainId = network === "polygon" ? "137" : "80002";
+const chainIdByNetwork = {
+  polygon: "137",
+  amoy: "80002",
+};
+const chainId = chainIdByNetwork[network] || "137";
 
 const addressRegex = /^0x[a-fA-F0-9]{40}$/;
 
