@@ -161,3 +161,5 @@ export const qrRegistryAbi = [
     ],
   },
 ] as const;
+
+export * from "./sealed-backup.js";
