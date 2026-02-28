@@ -9,6 +9,7 @@ This repo includes a one-shot bootstrap script for fresh Ubuntu 24.04 servers:
 - optionally deploys the Cloudflare worker on each redeploy
 
 Default chain configuration is Polygon mainnet (`chainId=137`, `https://polygon-rpc.com`).
+This setup is for the web app VPS. Resolver should run as a Cloudflare Worker.
 
 ## 1) DNS before running (recommended)
 

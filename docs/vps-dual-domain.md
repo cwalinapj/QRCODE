@@ -1,5 +1,7 @@
 # Dual-Domain VPS Deployment (Web + Resolver)
 
+Deprecated for recommended production path. Use `docs/resolver-api.md` and deploy resolver on Cloudflare Worker instead of VPS.
+
 This setup runs both app servers on one Ubuntu 24 VPS:
 
 - Web app server (`apps/web`) on `127.0.0.1:3000`

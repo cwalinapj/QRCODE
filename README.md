@@ -13,6 +13,7 @@ Production-ready MVP monorepo for minting QR records on Polygon using **USDC onl
 - Web app mint flow (MetaMask + WalletConnect)
 - QR download as SVG + PNG
 - Cloudflare Worker resolver (`/r/<tokenId>`) with on-chain verification and optional auto-redirect
+- Paid resolver API (`/api/resolve/<tokenId>`) with API keys and credit metering
 
 ## Repository layout
 
@@ -107,6 +108,11 @@ Worker routes:
 
 - `GET /health`
 - `GET /r/<tokenId>`
+- `GET /api/resolve/<tokenId>` (requires API key + consumes 1 credit)
+- `GET /api/me` (API key status/remaining credits)
+- `POST /api/admin/keys/create` (admin auth)
+- `POST /api/admin/keys/topup` (admin auth)
+- `GET /api/admin/keys/:id` (admin auth)
 
 ## Ubuntu 24 VPS Auto-Deploy
 
@@ -130,15 +136,17 @@ sudo FORCE_DEPLOY=1 /usr/local/bin/qr-forever-redeploy.sh
 
 Detailed guide: `docs/vps-deploy.md`
 
-## Ubuntu 24 VPS Dual-Domain (Web + Resolver)
+## Resolver Deployment (Cloudflare Worker)
 
-If you want both servers running on the VPS with separate domains:
+Resolver VPS is optional. Recommended architecture is Cloudflare Worker only for resolver.
+
+Deploy worker:
 
 ```bash
-sudo APP_DOMAIN=app.yourdomain.com RESOLVER_DOMAIN=q.yourdomain.com ENABLE_TLS=true LETSENCRYPT_EMAIL=you@yourdomain.com bash scripts/vps/bootstrap-ubuntu24-dual-domain.sh
+pnpm worker:deploy
 ```
 
-Guide: `docs/vps-dual-domain.md`
+Set `ADMIN_API_TOKEN` (secret) and worker vars in `.env` first. See `apps/resolver-worker/.dev.vars.example`.
 
 ## Mint QR (Polygon mainnet)
 

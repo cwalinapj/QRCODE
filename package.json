@@ -15,7 +15,8 @@
     "contracts:compile": "pnpm --filter @qr-forever/contracts compile",
     "contracts:test": "pnpm --filter @qr-forever/contracts test",
     "contracts:deploy": "pnpm --filter @qr-forever/contracts deploy:polygon",
-    "deploy:checklist": "node scripts/deploy-checklist.mjs"
+    "deploy:checklist": "node scripts/deploy-checklist.mjs",
+    "worker:deploy": "bash scripts/deploy-worker.sh"
   },
   "devDependencies": {
     "@playwright/test": "^1.54.2"
