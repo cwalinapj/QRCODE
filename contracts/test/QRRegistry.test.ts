@@ -31,6 +31,47 @@ describe("QRRegistry", function () {
     expect(await usdc.balanceOf(treasury.address)).to.equal(19_000_000);
   });
 
+  it("mints immutable backup URL from CID via helper function", async function () {
+    const { deployer, user, treasury, usdc, registry } = await deploy();
+    await registry.connect(deployer).setBackupResolverBaseUrl("https://q.example.com/backup");
+    await usdc.connect(user).approve(await registry.getAddress(), 19_000_000);
+
+    await expect(
+      registry
+        .connect(user)
+        .mintImmutableBackup("bafybeigdyrzt6w6w6xzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz"),
+    )
+      .to.emit(registry, "Minted")
+      .withArgs(
+        1,
+        user.address,
+        0,
+        "url",
+        "https://q.example.com/backup/bafybeigdyrzt6w6w6xzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz",
+      );
+
+    expect(await usdc.balanceOf(treasury.address)).to.equal(19_000_000);
+  });
+
+  it("rejects backup mint if backup base url is not configured", async function () {
+    const { user, usdc, registry } = await deploy();
+    await usdc.connect(user).approve(await registry.getAddress(), 19_000_000);
+
+    await expect(
+      registry
+        .connect(user)
+        .mintImmutableBackup("bafybeigdyrzt6w6w6xzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz"),
+    ).to.be.reverted;
+  });
+
+  it("rejects backup mint with invalid cid", async function () {
+    const { deployer, user, usdc, registry } = await deploy();
+    await registry.connect(deployer).setBackupResolverBaseUrl("https://q.example.com/backup");
+    await usdc.connect(user).approve(await registry.getAddress(), 19_000_000);
+
+    await expect(registry.connect(user).mintImmutableBackup("invalid-cid!")).to.be.reverted;
+  });
+
   it("mints immutable url target", async function () {
     const { user, treasury, usdc, registry } = await deploy();
     await usdc.connect(user).approve(await registry.getAddress(), 19_000_000);

@@ -26,6 +26,7 @@ contract QRRegistry is ERC721, Ownable {
 
     IERC20 public immutable usdc;
     address public treasury;
+    string public backupResolverBaseUrl;
 
     uint256 public nextTokenId = 1;
 
@@ -53,6 +54,8 @@ contract QRRegistry is ERC721, Ownable {
         string newTarget
     );
 
+    event BackupResolverBaseUrlUpdated(string oldBaseUrl, string newBaseUrl);
+
     error InvalidMode();
     error InvalidTargetType();
     error InvalidTarget();
@@ -64,6 +67,7 @@ contract QRRegistry is ERC721, Ownable {
     error PaymentFailed();
     error ZeroAddress();
     error TokenNotMinted();
+    error BackupResolverNotConfigured();
 
     constructor(address usdcAddress, address treasuryAddress)
         ERC721("QR Forever", "QRF")
@@ -79,6 +83,13 @@ contract QRRegistry is ERC721, Ownable {
     function setTreasury(address newTreasury) external onlyOwner {
         if (newTreasury == address(0)) revert ZeroAddress();
         treasury = newTreasury;
+    }
+
+    function setBackupResolverBaseUrl(string calldata newBaseUrl) external onlyOwner {
+        _validateHttps(newBaseUrl);
+        string memory oldBaseUrl = backupResolverBaseUrl;
+        backupResolverBaseUrl = newBaseUrl;
+        emit BackupResolverBaseUrlUpdated(oldBaseUrl, newBaseUrl);
     }
 
     function mintImmutable(string calldata targetType, string calldata target) external returns (uint256 tokenId) {
@@ -104,6 +115,33 @@ contract QRRegistry is ERC721, Ownable {
         });
 
         emit Minted(tokenId, msg.sender, MODE_IMMUTABLE, targetType, target);
+    }
+
+    function mintImmutableBackup(string calldata cid) external returns (uint256 tokenId) {
+        if (bytes(backupResolverBaseUrl).length == 0) revert BackupResolverNotConfigured();
+
+        _validateIpfs(cid);
+        string memory normalizedCid = _normalizeCid(cid);
+        string memory backupUrl = _buildBackupUrl(normalizedCid);
+        _validateHttps(backupUrl);
+
+        _collectUSDC(msg.sender, immutableIpfsPriceUSDC);
+
+        tokenId = nextTokenId++;
+        _safeMint(msg.sender, tokenId);
+
+        _records[tokenId] = Record({
+            mode: MODE_IMMUTABLE,
+            target: backupUrl,
+            targetType: "url",
+            createdAt: uint64(block.timestamp),
+            updatedAt: uint64(block.timestamp),
+            timelockSeconds: 0,
+            pendingTarget: "",
+            pendingTargetAt: 0
+        });
+
+        emit Minted(tokenId, msg.sender, MODE_IMMUTABLE, "url", backupUrl);
     }
 
     function mintUpdateable(
@@ -273,7 +311,7 @@ contract QRRegistry is ERC721, Ownable {
         revert InvalidTargetType();
     }
 
-    function _validateHttps(string calldata url) internal pure {
+    function _validateHttps(string memory url) internal pure {
         bytes memory b = bytes(url);
         bytes memory prefix = bytes("https://");
         if (b.length <= prefix.length) revert InvalidTarget();
@@ -350,5 +388,26 @@ contract QRRegistry is ERC721, Ownable {
         }
 
         return true;
+    }
+
+    function _normalizeCid(string calldata cid) internal pure returns (string memory) {
+        bytes memory b = bytes(cid);
+        uint256 idx = _startsWith(cid, "ipfs://") ? 7 : 0;
+        bytes memory out = new bytes(b.length - idx);
+
+        for (uint256 i = 0; i < out.length; i++) {
+            out[i] = b[i + idx];
+        }
+
+        return string(out);
+    }
+
+    function _buildBackupUrl(string memory cid) internal view returns (string memory) {
+        bytes memory base = bytes(backupResolverBaseUrl);
+        if (base.length == 0) revert BackupResolverNotConfigured();
+        if (base[base.length - 1] == 0x2f) {
+            return string.concat(backupResolverBaseUrl, cid);
+        }
+        return string.concat(backupResolverBaseUrl, "/", cid);
     }
 }

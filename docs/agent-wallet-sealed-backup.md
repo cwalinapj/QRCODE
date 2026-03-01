@@ -9,8 +9,8 @@ Replace plaintext seed phrase backups with a sealed backup flow:
 1. Generate mnemonic (12 or 24 words)
 2. Encrypt mnemonic client-side
 3. Store encrypted envelope in Vault/IPFS
-4. Build immutable backup locator URL from CID
-5. Mint immutable QR in `QRRegistry`
+4. Configure backup base URL once in `QRRegistry`
+5. Mint immutable backup QR in `QRRegistry` from CID
 6. Recover using QR + passphrase (optional passkey hardening)
 
 ## Security model
@@ -33,8 +33,8 @@ Exports:
 - `unsealMnemonicBackup(...)`
 - `serializeQrPayload(...)`
 - `parseQrPayload(...)`
-- `buildSealedBackupLocatorUrl(...)`
-- `buildImmutableBackupMintTarget(...)`
+- `buildSealedBackupLocatorUrl(...)` (optional helper for preview/debug)
+- `buildImmutableBackupMintTarget(...)` (optional helper for legacy `mintImmutable`)
 
 ## Data formats
 
@@ -92,18 +92,17 @@ const { envelope, qrPayload } = await sealMnemonicBackup({
 ```
 
 5. Upload `envelope` JSON to Vault/IPFS and get final CID.
-6. Build immutable mint target:
+6. Mint immutable backup directly from CID:
 
 ```ts
-const { targetType, target } = buildImmutableBackupMintTarget({
-  resolverBaseUrl: "https://q.yourdomain.com",
-  cid: finalCid,
-});
-// targetType === "url"
-// target === "https://q.yourdomain.com/backup/<cid>"
+// one-time owner/admin setup
+await registry.write.setBackupResolverBaseUrl(["https://q.yourdomain.com/backup"]);
+
+// user mint
+await registry.write.mintImmutableBackup([finalCid]);
 ```
 
-7. Mint immutable QR with `mintImmutable(targetType, target)`.
+7. QR still resolves at `https://q.yourdomain.com/r/<tokenId>`.
 8. Print/store minted resolver QR (`https://q.yourdomain.com/r/<tokenId>`).
 9. Clear mnemonic and intermediate secrets from memory where possible.
 

@@ -10,10 +10,12 @@ This is the recommended simple mode for your wallet product goal:
 
 1. Encrypt mnemonic locally in wallet app.
 2. Upload encrypted envelope JSON to IPFS/Arweave.
-3. Mint immutable QR record with target:
-   - `https://q.yourdomain.com/backup/<cid>`
-4. User prints/stores QR.
-5. Recovery requires QR + passphrase.
+3. Set contract backup base URL once:
+   - `setBackupResolverBaseUrl("https://q.yourdomain.com/backup")`
+4. Mint immutable backup record directly from CID:
+   - `mintImmutableBackup("<cid>")`
+5. User prints/stores QR.
+6. Recovery requires QR + passphrase.
 
 ## Why this is better than plaintext words
 
@@ -36,7 +38,6 @@ Default gateway is configurable with:
 Use helpers from `@qr-forever/shared`:
 
 - `sealMnemonicBackup`
-- `buildImmutableBackupMintTarget`
 - `unsealMnemonicBackup`
 
 ## Example
@@ -49,18 +50,13 @@ const { envelope } = await sealMnemonicBackup({
   vaultCid: finalCid,
 });
 
-const mintTarget = buildImmutableBackupMintTarget({
-  resolverBaseUrl: "https://q.yourdomain.com",
-  cid: finalCid,
-});
-
-// mintTarget.targetType === "url"
-// mintTarget.target === "https://q.yourdomain.com/backup/<cid>"
+// owner/admin (once)
+await registry.write.setBackupResolverBaseUrl(["https://q.yourdomain.com/backup"]);
 ```
 
-Mint immutable with:
+Mint immutable backup with:
 
-- `mintImmutable(mintTarget.targetType, mintTarget.target)`
+- `mintImmutableBackup(finalCid)`
 
 The minted QR URL remains:
 

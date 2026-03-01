@@ -158,12 +158,13 @@ Backup flow docs:
 
 1. Deploy `QRRegistry` to Polygon mainnet.
 2. Set `NEXT_PUBLIC_CONTRACT_ADDRESS` and `RESOLVER_CONTRACT_ADDRESS`.
-3. Fund wallet with POL gas and hold Polygon USDC.
-4. Open web app.
-5. Connect wallet.
-6. Choose mode + target.
-7. Approve USDC and mint.
-8. Open generated resolver URL.
+3. For sealed backups, set `setBackupResolverBaseUrl("https://q.yourdomain.com/backup")` once as contract owner.
+4. Fund wallet with POL gas and hold Polygon USDC.
+5. Open web app.
+6. Connect wallet.
+7. Choose mode + target.
+8. Approve USDC and mint.
+9. Open generated resolver URL.
 
 ## Security model
 
