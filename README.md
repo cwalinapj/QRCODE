@@ -108,6 +108,7 @@ Worker routes:
 
 - `GET /health`
 - `GET /r/<tokenId>`
+- `GET /backup/<cid>` (encrypted backup envelope fetch via configured IPFS gateway)
 - `GET /api/resolve/<tokenId>` (requires API key + consumes 1 credit)
 - `GET /api/me` (API key status/remaining credits)
 - `POST /api/admin/keys/create` (admin auth)
@@ -148,6 +149,11 @@ pnpm worker:deploy
 
 Set `ADMIN_API_TOKEN` (secret) and worker vars in `.env` first. See `apps/resolver-worker/.dev.vars.example`.
 
+Backup flow docs:
+
+- `docs/simple-production-backup.md`
+- `docs/agent-wallet-sealed-backup.md`
+
 ## Mint QR (Polygon mainnet)
 
 1. Deploy `QRRegistry` to Polygon mainnet.
@@ -161,7 +167,7 @@ Set `ADMIN_API_TOKEN` (secret) and worker vars in `.env` first. See `apps/resolv
 
 ## Security model
 
-- Input validation for `url`, `ipfs`, `arweave` targets
+- Input validation for `url`, `address`, `ipfs`, `arweave` targets
 - USDC-only payment path (no POL/MATIC mint payment)
 - No updates on immutable mode
 - Updateable mode owner-only updates

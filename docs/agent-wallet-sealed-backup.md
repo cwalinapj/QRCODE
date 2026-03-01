@@ -1,6 +1,6 @@
 # Agent Implementation Guide: Sealed QR Backup for Mnemonic
 
-This guide is for the wallet app agent implementing QR-based mnemonic backup.
+This guide is for the wallet app agent implementing QR-based mnemonic backup with immutable QR records.
 
 ## Goal
 
@@ -9,17 +9,17 @@ Replace plaintext seed phrase backups with a sealed backup flow:
 1. Generate mnemonic (12 or 24 words)
 2. Encrypt mnemonic client-side
 3. Store encrypted envelope in Vault/IPFS
-4. Encode QR with metadata + CID only
-5. Recovery requires QR + passphrase + passkey-bound secret
+4. Build immutable backup locator URL from CID
+5. Mint immutable QR in `QRRegistry`
+6. Recover using QR + passphrase (optional passkey hardening)
 
 ## Security model
 
 - QR must never contain plaintext mnemonic
 - Vault/IPFS must never contain plaintext mnemonic
 - Decryption happens only in wallet client runtime
-- Require both:
-  - passphrase/PIN
-  - passkey-bound secret (WebAuthn-derived)
+- Baseline requirement: passphrase/PIN
+- Optional hardening: passkey-bound secret (WebAuthn-derived)
 
 ## Shared module location
 
@@ -33,6 +33,8 @@ Exports:
 - `unsealMnemonicBackup(...)`
 - `serializeQrPayload(...)`
 - `parseQrPayload(...)`
+- `buildSealedBackupLocatorUrl(...)`
+- `buildImmutableBackupMintTarget(...)`
 
 ## Data formats
 
@@ -57,7 +59,7 @@ Exports:
 }
 ```
 
-### QR payload (print/store)
+### Optional backup card QR payload (print/store)
 
 ```json
 {
@@ -75,8 +77,8 @@ Exports:
 ## Create flow (wallet app)
 
 1. Generate mnemonic.
-2. Obtain passkey-bound secret bytes (32-byte minimum) from wallet passkey subsystem.
-3. Prompt user for backup passphrase/PIN.
+2. Prompt user for backup passphrase/PIN.
+3. Optionally obtain passkey-bound secret bytes.
 4. Call:
 
 ```ts
@@ -84,32 +86,44 @@ const { envelope, qrPayload } = await sealMnemonicBackup({
   mnemonic,
   handle: "paul.cwalina",
   passphrase,
-  passkeySecret,
+  passkeySecret, // optional
   vaultCid,
 });
 ```
 
 5. Upload `envelope` JSON to Vault/IPFS and get final CID.
-6. Rebuild QR payload with final CID if needed.
-7. Render QR from `serializeQrPayload(qrPayload)` and let user print.
-8. Immediately clear mnemonic and intermediate secrets from memory where possible.
+6. Build immutable mint target:
+
+```ts
+const { targetType, target } = buildImmutableBackupMintTarget({
+  resolverBaseUrl: "https://q.yourdomain.com",
+  cid: finalCid,
+});
+// targetType === "url"
+// target === "https://q.yourdomain.com/backup/<cid>"
+```
+
+7. Mint immutable QR with `mintImmutable(targetType, target)`.
+8. Print/store minted resolver QR (`https://q.yourdomain.com/r/<tokenId>`).
+9. Clear mnemonic and intermediate secrets from memory where possible.
 
 ## Recovery flow (wallet app)
 
-1. Scan QR and parse with `parseQrPayload`.
-2. Fetch envelope JSON by CID from Vault/IPFS.
-3. Require biometric passkey + passphrase.
-4. Call:
+1. Scan minted QR (`/r/<tokenId>`).
+2. Resolver verifies on-chain record and redirects to `/backup/<cid>`.
+3. Wallet app fetches sealed envelope JSON.
+4. Prompt passphrase (and optional passkey step).
+5. Call:
 
 ```ts
 const mnemonic = await unsealMnemonicBackup({
   envelope,
   passphrase,
-  passkeySecret,
+  passkeySecret, // optional
 });
 ```
 
-5. Use mnemonic only in secure recovery context; do not log/store plaintext.
+6. Use mnemonic only in secure recovery context; do not log/store plaintext.
 
 ## Hardening requirements for production
 
@@ -121,6 +135,6 @@ const mnemonic = await unsealMnemonicBackup({
 
 ## Notes
 
-- This protects against casual theft of printed QR alone.
-- If attacker gets both QR and user passphrase/passkey secret, recovery is possible.
-- Test-only wallets are still safer with sealed backups than plaintext phrase notes.
+- This is materially safer than writing plaintext seed words on paper.
+- If attacker gets both QR and user passphrase, recovery is possible.
+- Optional passkey secret increases resistance for high-value wallets.

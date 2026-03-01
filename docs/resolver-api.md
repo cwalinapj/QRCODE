@@ -3,6 +3,7 @@
 This architecture keeps the resolver at the edge via Cloudflare Worker.
 
 - Public scanner route: `GET /r/:tokenId` (can stay open)
+- Backup envelope route: `GET /backup/:cid` (returns encrypted JSON envelope from IPFS gateway)
 - Paid API route: `GET /api/resolve/:tokenId` (API key + credits)
 
 Resolution uses on-chain read calls (`eth_call`), so there is no gas cost per resolve call.
@@ -14,6 +15,7 @@ Set these (vars + secret):
 - `CONTRACT_ADDRESS`
 - `POLYGON_RPC_URL`
 - `RATE_LIMIT_PER_MINUTE`
+- `IPFS_GATEWAY_BASE` (default `https://ipfs.io/ipfs`)
 - `ALLOW_PUBLIC_RESOLVER` (`true` or `false`)
 - `ADMIN_API_TOKEN` (secret)
 - Optional: `BILLING_WEBHOOK_URL`, `BILLING_WEBHOOK_AUTH`

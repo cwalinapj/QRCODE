@@ -1,6 +1,8 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  buildImmutableBackupMintTarget,
+  buildSealedBackupLocatorUrl,
   parseQrPayload,
   sealMnemonicBackup,
   serializeQrPayload,
@@ -69,5 +71,38 @@ describe("sealed mnemonic backup", () => {
     const decoded = parseQrPayload(encoded);
     expect(decoded.cid).toBe(qrPayload.cid);
     expect(decoded.handle).toBe("paul.cwalina");
+  });
+
+  it("supports passphrase-only mode", async () => {
+    const { envelope } = await sealMnemonicBackup({
+      mnemonic,
+      handle: "paul.cwalina",
+      passphrase: "just-a-passphrase",
+      vaultCid: "bafybeigdyrzt6w6w6xzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz",
+      pbkdf2Iterations: 10_000,
+    });
+
+    const decoded = await unsealMnemonicBackup({
+      envelope,
+      passphrase: "just-a-passphrase",
+    });
+    expect(decoded).toBe(mnemonic);
+  });
+
+  it("builds immutable backup mint target url", () => {
+    const url = buildSealedBackupLocatorUrl(
+      "https://q.example.com",
+      "bafybeigdyrzt6w6w6xzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz",
+    );
+    expect(url).toBe(
+      "https://q.example.com/backup/bafybeigdyrzt6w6w6xzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz",
+    );
+
+    const mintTarget = buildImmutableBackupMintTarget({
+      resolverBaseUrl: "https://q.example.com",
+      cid: "bafybeigdyrzt6w6w6xzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz",
+    });
+    expect(mintTarget.targetType).toBe("url");
+    expect(mintTarget.target).toBe(url);
   });
 });

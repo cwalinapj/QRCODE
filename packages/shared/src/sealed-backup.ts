@@ -34,7 +34,7 @@ export type SealMnemonicInput = {
   mnemonic: string;
   handle: string;
   passphrase: string;
-  passkeySecret: Uint8Array | string;
+  passkeySecret?: Uint8Array | string;
   vaultCid: string;
   pbkdf2Iterations?: number;
 };
@@ -87,6 +87,11 @@ function fromBytes(input: Uint8Array): string {
 function normalizePasskeySecret(secret: Uint8Array | string): Uint8Array {
   if (secret instanceof Uint8Array) return secret;
   return base64ToBytes(secret);
+}
+
+function normalizeOptionalPasskeySecret(secret?: Uint8Array | string): Uint8Array {
+  if (!secret) return new Uint8Array(0);
+  return normalizePasskeySecret(secret);
 }
 
 function joinSecrets(passphrase: string, passkeySecret: Uint8Array): Uint8Array {
@@ -150,7 +155,7 @@ export async function sealMnemonicBackup(input: SealMnemonicInput): Promise<{
   const salt = cryptoLike.getRandomValues(new Uint8Array(16));
   const nonce = cryptoLike.getRandomValues(new Uint8Array(12));
   const iterations = input.pbkdf2Iterations ?? 600_000;
-  const passkeySecret = normalizePasskeySecret(input.passkeySecret);
+  const passkeySecret = normalizeOptionalPasskeySecret(input.passkeySecret);
   const aesKey = await deriveAesKey(cryptoLike, input.passphrase, passkeySecret, salt, iterations);
 
   const ciphertext = await cryptoLike.subtle.encrypt(
@@ -193,7 +198,7 @@ export async function sealMnemonicBackup(input: SealMnemonicInput): Promise<{
 export async function unsealMnemonicBackup(args: {
   envelope: SealedMnemonicEnvelope;
   passphrase: string;
-  passkeySecret: Uint8Array | string;
+  passkeySecret?: Uint8Array | string;
 }): Promise<string> {
   const { envelope } = args;
   if (envelope.version !== 1 || envelope.type !== "sealed-mnemonic") {
@@ -207,7 +212,7 @@ export async function unsealMnemonicBackup(args: {
   }
 
   const cryptoLike = getCrypto();
-  const passkeySecret = normalizePasskeySecret(args.passkeySecret);
+  const passkeySecret = normalizeOptionalPasskeySecret(args.passkeySecret);
   const salt = base64ToBytes(envelope.kdf.saltB64);
   const nonce = base64ToBytes(envelope.cipher.nonceB64);
   const ciphertext = base64ToBytes(envelope.ciphertextB64);
@@ -241,4 +246,26 @@ export function parseQrPayload(input: string): SealedMnemonicQrPayload {
     throw new Error("Invalid QR payload");
   }
   return parsed;
+}
+
+export function buildSealedBackupLocatorUrl(resolverBaseUrl: string, cid: string): string {
+  const base = resolverBaseUrl.replace(/\/+$/, "");
+  const cleanCid = cid.trim().replace(/^ipfs:\/\//, "").replace(/^\//, "");
+  if (!base.startsWith("https://")) {
+    throw new Error("resolverBaseUrl must start with https://");
+  }
+  if (!cleanCid) {
+    throw new Error("cid is required");
+  }
+  return `${base}/backup/${encodeURIComponent(cleanCid)}`;
+}
+
+export function buildImmutableBackupMintTarget(args: {
+  resolverBaseUrl: string;
+  cid: string;
+}): { targetType: "url"; target: string } {
+  return {
+    targetType: "url",
+    target: buildSealedBackupLocatorUrl(args.resolverBaseUrl, args.cid),
+  };
 }
