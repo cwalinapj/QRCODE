@@ -108,7 +108,6 @@ Worker routes:
 
 - `GET /health`
 - `GET /r/<tokenId>`
-- `GET /backup/<cid>` (encrypted backup envelope fetch via configured IPFS gateway)
 - `GET /api/resolve/<tokenId>` (requires API key + consumes 1 credit)
 - `GET /api/me` (API key status/remaining credits)
 - `POST /api/admin/keys/create` (admin auth)
@@ -158,7 +157,7 @@ Backup flow docs:
 
 1. Deploy `QRRegistry` to Polygon mainnet.
 2. Set `NEXT_PUBLIC_CONTRACT_ADDRESS` and `RESOLVER_CONTRACT_ADDRESS`.
-3. For sealed backups, set `setBackupResolverBaseUrl("https://q.yourdomain.com/backup")` once as contract owner.
+3. For sealed backups, store encrypted envelope on Arweave and mint with `mintImmutableBackup(arweaveTxId)`.
 4. Fund wallet with POL gas and hold Polygon USDC.
 5. Open web app.
 6. Connect wallet.

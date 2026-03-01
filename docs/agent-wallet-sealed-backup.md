@@ -8,15 +8,14 @@ Replace plaintext seed phrase backups with a sealed backup flow:
 
 1. Generate mnemonic (12 or 24 words)
 2. Encrypt mnemonic client-side
-3. Store encrypted envelope in Vault/IPFS
-4. Configure backup base URL once in `QRRegistry`
-5. Mint immutable backup QR in `QRRegistry` from CID
-6. Recover using QR + passphrase (optional passkey hardening)
+3. Store encrypted envelope in Arweave
+4. Mint immutable backup QR in `QRRegistry` using direct Arweave target
+5. Recover using QR + passphrase (optional passkey hardening)
 
 ## Security model
 
 - QR must never contain plaintext mnemonic
-- Vault/IPFS must never contain plaintext mnemonic
+- Arweave payload must never contain plaintext mnemonic
 - Decryption happens only in wallet client runtime
 - Baseline requirement: passphrase/PIN
 - Optional hardening: passkey-bound secret (WebAuthn-derived)
@@ -33,12 +32,11 @@ Exports:
 - `unsealMnemonicBackup(...)`
 - `serializeQrPayload(...)`
 - `parseQrPayload(...)`
-- `buildSealedBackupLocatorUrl(...)` (optional helper for preview/debug)
-- `buildImmutableBackupMintTarget(...)` (optional helper for legacy `mintImmutable`)
+- `buildImmutableBackupMintTarget(...)`
 
 ## Data formats
 
-### Sealed envelope (store in Vault/IPFS)
+### Sealed envelope (store in Arweave)
 
 ```json
 {
@@ -59,14 +57,14 @@ Exports:
 }
 ```
 
-### Optional backup card QR payload (print/store)
+### Optional backup card QR payload
 
 ```json
 {
   "v": 1,
   "type": "sealed-mnemonic",
   "handle": "paul.cwalina",
-  "cid": "bafy...",
+  "cid": "N4x2kQ5M7YB7s4cL6Xg3b7h2vI7RwPZ_8QyV3gk8oXc",
   "kdf": "pbkdf2-sha256",
   "cipher": "aes-256-gcm",
   "salt": "...",
@@ -82,35 +80,37 @@ Exports:
 4. Call:
 
 ```ts
-const { envelope, qrPayload } = await sealMnemonicBackup({
+const { envelope } = await sealMnemonicBackup({
   mnemonic,
   handle: "paul.cwalina",
   passphrase,
   passkeySecret, // optional
-  vaultCid,
+  vaultCid: arweaveTxId,
 });
 ```
 
-5. Upload `envelope` JSON to Vault/IPFS and get final CID.
-6. Mint immutable backup directly from CID:
+5. Upload `envelope` JSON to Arweave and get `arweaveTxId`.
+6. Mint immutable backup directly:
 
 ```ts
-// one-time owner/admin setup
-await registry.write.setBackupResolverBaseUrl(["https://q.yourdomain.com/backup"]);
-
-// user mint
-await registry.write.mintImmutableBackup([finalCid]);
+await registry.write.mintImmutableBackup([arweaveTxId]);
 ```
 
-7. QR still resolves at `https://q.yourdomain.com/r/<tokenId>`.
-8. Print/store minted resolver QR (`https://q.yourdomain.com/r/<tokenId>`).
-9. Clear mnemonic and intermediate secrets from memory where possible.
+Alternative generic path:
+
+```ts
+const mintTarget = buildImmutableBackupMintTarget({ arweaveTxId });
+await registry.write.mintImmutable([mintTarget.targetType, mintTarget.target]);
+```
+
+7. QR resolves at `https://q.yourdomain.com/r/<tokenId>`.
+8. Clear mnemonic and intermediate secrets from memory where possible.
 
 ## Recovery flow (wallet app)
 
 1. Scan minted QR (`/r/<tokenId>`).
-2. Resolver verifies on-chain record and redirects to `/backup/<cid>`.
-3. Wallet app fetches sealed envelope JSON.
+2. Resolver verifies on-chain record and redirects to Arweave destination.
+3. Wallet app fetches sealed envelope JSON from Arweave.
 4. Prompt passphrase (and optional passkey step).
 5. Call:
 

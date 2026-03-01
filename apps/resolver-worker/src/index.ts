@@ -16,7 +16,6 @@ type Env = {
   CONTRACT_ADDRESS: string;
   RATE_LIMIT_PER_MINUTE?: string;
   MOCK_RECORDS_JSON?: string;
-  IPFS_GATEWAY_BASE?: string;
   ALLOW_PUBLIC_RESOLVER?: string;
   ADMIN_API_TOKEN?: string;
   BILLING_WEBHOOK_URL?: string;
@@ -318,16 +317,6 @@ function parseTokenId(pathname: string): string | null {
   return apiMatch?.[1] || null;
 }
 
-function parseBackupCid(pathname: string): string | null {
-  const match = pathname.match(/^\/backup\/([^/]+)$/);
-  return match?.[1] || null;
-}
-
-function isValidBackupCid(rawCid: string): boolean {
-  if (!rawCid || rawCid.length > 200) return false;
-  return /^(Qm[1-9A-HJ-NP-Za-km-z]{44}|bafy[1-9A-HJ-NP-Za-km-z]{20,})$/.test(rawCid);
-}
-
 function readMockRecord(env: Env, tokenId: string): {
   targetType: TargetType;
   target: string;
@@ -553,35 +542,6 @@ export default {
         totalCalls: record.totalCalls,
         active: record.active,
         lastUsedAt: record.lastUsedAt || null,
-      });
-    }
-
-    const backupCid = parseBackupCid(url.pathname);
-    if (backupCid) {
-      const cid = decodeURIComponent(backupCid);
-      if (!isValidBackupCid(cid)) {
-        return jsonResponse({ error: "invalid_cid" }, 400);
-      }
-
-      const gatewayBase = (env.IPFS_GATEWAY_BASE || "https://ipfs.io/ipfs").replace(/\/+$/, "");
-      const upstream = `${gatewayBase}/${encodeURIComponent(cid)}`;
-      const res = await fetch(upstream, {
-        method: "GET",
-        headers: {
-          accept: "application/json",
-        },
-      });
-
-      if (!res.ok) {
-        return jsonResponse({ error: "backup_not_found", cid }, 404);
-      }
-
-      return new Response(await res.text(), {
-        status: 200,
-        headers: {
-          "content-type": "application/json; charset=utf-8",
-          "cache-control": "public, max-age=120",
-        },
       });
     }
 

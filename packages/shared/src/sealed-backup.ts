@@ -248,24 +248,13 @@ export function parseQrPayload(input: string): SealedMnemonicQrPayload {
   return parsed;
 }
 
-export function buildSealedBackupLocatorUrl(resolverBaseUrl: string, cid: string): string {
-  const base = resolverBaseUrl.replace(/\/+$/, "");
-  const cleanCid = cid.trim().replace(/^ipfs:\/\//, "").replace(/^\//, "");
-  if (!base.startsWith("https://")) {
-    throw new Error("resolverBaseUrl must start with https://");
-  }
-  if (!cleanCid) {
-    throw new Error("cid is required");
-  }
-  return `${base}/backup/${encodeURIComponent(cleanCid)}`;
-}
-
 export function buildImmutableBackupMintTarget(args: {
-  resolverBaseUrl: string;
-  cid: string;
-}): { targetType: "url"; target: string } {
+  arweaveTxId: string;
+}): { targetType: "arweave"; target: string } {
+  const clean = args.arweaveTxId.trim();
+  if (!clean) throw new Error("arweaveTxId is required");
   return {
-    targetType: "url",
-    target: buildSealedBackupLocatorUrl(args.resolverBaseUrl, args.cid),
+    targetType: "arweave",
+    target: clean.startsWith("ar://") ? clean : `ar://${clean}`,
   };
 }

@@ -2,7 +2,6 @@ import { describe, expect, it } from "vitest";
 
 import {
   buildImmutableBackupMintTarget,
-  buildSealedBackupLocatorUrl,
   parseQrPayload,
   sealMnemonicBackup,
   serializeQrPayload,
@@ -89,20 +88,11 @@ describe("sealed mnemonic backup", () => {
     expect(decoded).toBe(mnemonic);
   });
 
-  it("builds immutable backup mint target url", () => {
-    const url = buildSealedBackupLocatorUrl(
-      "https://q.example.com",
-      "bafybeigdyrzt6w6w6xzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz",
-    );
-    expect(url).toBe(
-      "https://q.example.com/backup/bafybeigdyrzt6w6w6xzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz",
-    );
-
+  it("builds immutable backup mint target for arweave", () => {
     const mintTarget = buildImmutableBackupMintTarget({
-      resolverBaseUrl: "https://q.example.com",
-      cid: "bafybeigdyrzt6w6w6xzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz",
+      arweaveTxId: "N4x2kQ5M7YB7s4cL6Xg3b7h2vI7RwPZ_8QyV3gk8oXc",
     });
-    expect(mintTarget.targetType).toBe("url");
-    expect(mintTarget.target).toBe(url);
+    expect(mintTarget.targetType).toBe("arweave");
+    expect(mintTarget.target).toBe("ar://N4x2kQ5M7YB7s4cL6Xg3b7h2vI7RwPZ_8QyV3gk8oXc");
   });
 });

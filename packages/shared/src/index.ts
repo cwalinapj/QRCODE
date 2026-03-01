@@ -129,15 +129,8 @@ export const qrRegistryAbi = [
     type: "function",
     name: "mintImmutableBackup",
     stateMutability: "nonpayable",
-    inputs: [{ internalType: "string", name: "cid", type: "string" }],
+    inputs: [{ internalType: "string", name: "arweaveTxId", type: "string" }],
     outputs: [{ internalType: "uint256", name: "tokenId", type: "uint256" }],
-  },
-  {
-    type: "function",
-    name: "setBackupResolverBaseUrl",
-    stateMutability: "nonpayable",
-    inputs: [{ internalType: "string", name: "newBaseUrl", type: "string" }],
-    outputs: [],
   },
   {
     type: "function",
